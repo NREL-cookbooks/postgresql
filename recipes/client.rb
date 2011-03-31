@@ -21,8 +21,6 @@ case node.platform
 when "ubuntu","debian"
   package "postgresql-client"
   package "libpq-dev"
-when "fedora","suse"
-  package "postgresql-devel"
-when "redhat","centos"
-  package "postgresql#{node.postgresql.version.split('.').join}-devel"
+when "redhat", "centos", "fedora", "suse"
+  package "postgresql"
 end

@@ -42,20 +42,14 @@ user "postgres" do
   supports :non_unique => true
 end
 
-package "postgresql" do
-  case node.platform
-  when "redhat","centos"
-    package_name "postgresql#{node.postgresql.version.split('.').join}"
-  else
-    package_name "postgresql"
-  end
-end
+package "postgresql-server"
 
-case node.platform
-when "redhat","centos"
-  package "postgresql#{node.postgresql.version.split('.').join}-server"
-when "fedora","suse"
-  package "postgresql-server"
+template "/etc/sysconfig/pgsql/postgresql" do
+  source "redhat.sysconfig.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  notifies :restart, "service[postgresql]"
 end
 
 execute "/sbin/service postgresql initdb" do
