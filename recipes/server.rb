@@ -27,3 +27,7 @@ when "redhat", "centos", "fedora", "suse"
 when "debian", "ubuntu"
   include_recipe "postgresql::server_debian"
 end
+
+if(node.recipe?("nagios::client"))
+  postgresql_user "nagios"
+end

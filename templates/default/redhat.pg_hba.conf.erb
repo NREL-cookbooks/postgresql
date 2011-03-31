@@ -72,3 +72,9 @@ local   all         all                               ident
 host    all         all         127.0.0.1/32          ident
 # IPv6 local connections:
 host    all         all         ::1/128               ident
+
+<% if(node.recipe?("nagios::client")) %>
+# Allow the limited nagios user local, password-less connections to check the
+# server status.
+host    all         nagios       127.0.0.1/32         trust
+<% end %>
