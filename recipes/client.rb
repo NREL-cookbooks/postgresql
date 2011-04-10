@@ -23,4 +23,5 @@ when "ubuntu","debian"
   package "libpq-dev"
 when "redhat", "centos", "fedora", "suse"
   package "postgresql"
+  package "postgresql-devel"
 end
