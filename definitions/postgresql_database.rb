@@ -68,16 +68,21 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
     if postgis
       include_recipe "postgresql::postgis"
 
+      postgis14_sql_file = "postgis.sql"
+      if(platform?("redhat", "centos", "fedora") && node[:kernel][:machine] == "x86_64")
+        postgis14_sql_file = "postgis-64.sql"
+      end
+
       # PostGIS 1.4 and above.
-      execute "psql -1 -f #{contrib}/postgis.sql #{params[:name]}" do
+      execute "psql -1 -f #{contrib}/#{postgis14_sql_file} #{params[:name]}" do
         user "postgres"
-        only_if { File.exists? "#{contrib}/postgis.sql" }
+        only_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
       end
 
       # PostGIS 1.3 and below.
       execute "psql -1 -f #{contrib}/lwpostgis.sql #{params[:name]}" do
         user "postgres"
-        not_if { File.exists? "#{contrib}/postgis.sql" }
+        not_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
       end
 
       modules << "spatial_ref_sys"
@@ -87,6 +92,11 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
     modules.uniq.each do |mod|
       execute "psql -1 -f #{contrib}/#{mod}.sql #{params[:name]}" do
         user "postgres"
+
+        # Skip postgis_comments if it's not available on the system.
+        not_if do
+          mod == "postgis_comments" && !File.exists?("#{contrib}/#{mod}.sql")
+        end
       end
     end
 

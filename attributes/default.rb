@@ -76,3 +76,5 @@ else
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 end
+
+default[:postgresql][:hba] = []
