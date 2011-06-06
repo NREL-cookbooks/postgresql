@@ -101,7 +101,7 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
     end
 
     if postgis
-      %w( geometry_columns spatial_ref_sys ).each do |table|
+      %w( geography_columns geometry_columns spatial_ref_sys ).each do |table|
         execute "psql -c 'ALTER TABLE #{table} OWNER TO #{params[:owner]}' #{params[:name]}" do
           user "postgres"
         end
