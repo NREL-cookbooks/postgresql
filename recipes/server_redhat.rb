@@ -25,14 +25,14 @@ include_recipe "postgresql::client"
 group "postgres" do
   # Workaround lack of option for -r and -o...
   group_name "-r -o postgres"
-  not_if { Etc.getgrnam("postgres") }
+  not_if { Etc.getgrnam("postgres") rescue false }
   gid 26
 end
 
 user "postgres" do
   # Workaround lack of option for -M and -n...
   username "-M -n postgres"
-  not_if { Etc.getpwnam("postgres") }
+  not_if { Etc.getpwnam("postgres") rescue false }
   shell "/bin/bash"
   comment "PostgreSQL Server"
   home "/var/lib/pgsql"
