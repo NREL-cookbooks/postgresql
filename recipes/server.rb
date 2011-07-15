@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+include_recipe "iptables::postgresql"
 include_recipe "postgresql::client"
 
 # Include the right "family" recipe for installing the server

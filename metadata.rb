@@ -5,6 +5,8 @@ description       "Installs and configures PostgreSQL for clients or servers"
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
 version           "0.11.1"
 
+depends "iptables"
+
 recipe            "postgresql", "Empty, use one of the other recipes"
 recipe            "postgresql::client", "Installs PostgreSQL client package(s)"
 recipe            "postgresql::server", "Installs PostgreSQL server packages, templates"
