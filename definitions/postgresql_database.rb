@@ -20,24 +20,26 @@
 define :postgresql_database, :action => :create, :owner => "postgres" do
   include_recipe "postgresql::server"
 
+  server_port = if(params[:server_port]) then "--port=#{params[:server_port]}" else "" end
+
   case params[:action]
   when :create
     if params[:template]
       template = "-T #{params[:template]}"
     end
 
-    execute "createdb #{template} #{params[:name]}" do
+    execute "createdb #{server_port} #{template} #{params[:name]}" do
       user "postgres"
-      not_if "psql -f /dev/null #{params[:name]}", :user => "postgres"
+      not_if "psql #{server_port} -f /dev/null #{params[:name]}", :user => "postgres"
     end
 
-    execute "psql -c 'ALTER DATABASE #{params[:name]} OWNER TO #{params[:owner]}'" do
+    execute "psql #{server_port} -c 'ALTER DATABASE #{params[:name]} OWNER TO #{params[:owner]}'" do
       user "postgres"
     end
 
     if params[:flags]
       params[:flags].each do |k,v|
-        execute "psql -c \"UPDATE pg_catalog.pg_database SET #{k} = '#{v}' WHERE datname = '#{params[:name]}'\" #{params[:name]}" do
+        execute "psql #{server_port} -c \"UPDATE pg_catalog.pg_database SET #{k} = '#{v}' WHERE datname = '#{params[:name]}'\" #{params[:name]}" do
           user "postgres"
         end
       end
@@ -54,9 +56,9 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
     contrib = node.postgresql.contrib_dir
 
     languages.uniq.each do |language|
-      execute "createlang #{language} #{params[:name]}" do
+      execute "createlang #{server_port} #{language} #{params[:name]}" do
         user "postgres"
-        not_if "psql -c 'SELECT lanname FROM pg_catalog.pg_language' #{params[:name]} | grep '^ #{language}$'", :user => "postgres"
+        not_if "psql #{server_port} -c 'SELECT lanname FROM pg_catalog.pg_language' #{params[:name]} | grep '^ #{language}$'", :user => "postgres"
       end
     end
 
@@ -74,13 +76,13 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
       end
 
       # PostGIS 1.4 and above.
-      execute "psql -1 -f #{contrib}/#{postgis14_sql_file} #{params[:name]}" do
+      execute "psql #{server_port} -1 -f #{contrib}/#{postgis14_sql_file} #{params[:name]}" do
         user "postgres"
         only_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
       end
 
       # PostGIS 1.3 and below.
-      execute "psql -1 -f #{contrib}/lwpostgis.sql #{params[:name]}" do
+      execute "psql #{server_port} -1 -f #{contrib}/lwpostgis.sql #{params[:name]}" do
         user "postgres"
         not_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
       end
@@ -90,7 +92,7 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
     end
 
     modules.uniq.each do |mod|
-      execute "psql -1 -f #{contrib}/#{mod}.sql #{params[:name]}" do
+      execute "psql #{server_port} -1 -f #{contrib}/#{mod}.sql #{params[:name]}" do
         user "postgres"
 
         # Skip postgis_comments if it's not available on the system.
@@ -102,13 +104,13 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
 
     if postgis
       %w( geography_columns geometry_columns spatial_ref_sys ).each do |table|
-        execute "psql -c 'ALTER TABLE #{table} OWNER TO #{params[:owner]}' #{params[:name]}" do
+        execute "psql #{server_port} -c 'ALTER TABLE #{table} OWNER TO #{params[:owner]}' #{params[:name]}" do
           user "postgres"
         end
       end
     end
   when :drop
-    execute "psql -c 'DROP DATABASE IF EXISTS #{params[:name]}'" do
+    execute "psql #{server_port} -c 'DROP DATABASE IF EXISTS #{params[:name]}'" do
       user "postgres"
     end
   end

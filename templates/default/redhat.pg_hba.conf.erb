@@ -83,7 +83,7 @@ host    all         all         ::1/128               ident
 host    all         nagios       127.0.0.1/32         trust
 <% end %>
 
-<% node[:postgresql][:hba].each do |hba| %>
+<% @hba.each do |hba| %>
 # <%= hba[:comment] %>
 <%= hba[:type] %>  <%= hba[:database] %>  <%= hba[:user] %>  <%= hba[:address] %>  <%= hba[:method] %>
 <% end %>

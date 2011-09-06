@@ -6,6 +6,7 @@ long_description  IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
 version           "0.11.1"
 
 depends "iptables"
+depends "openssl"
 
 recipe            "postgresql", "Empty, use one of the other recipes"
 recipe            "postgresql::client", "Installs PostgreSQL client package(s)"

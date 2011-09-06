@@ -49,6 +49,7 @@ template "/etc/sysconfig/pgsql/postgresql" do
   owner "root"
   group "root"
   mode "0644"
+  variables node[:postgresql]
   notifies :restart, "service[postgresql]"
 end
 
@@ -61,6 +62,7 @@ template "#{node[:postgresql][:dir]}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 0600
+  variables node[:postgresql]
   notifies :reload, "service[postgresql]"
 end
 

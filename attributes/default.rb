@@ -17,8 +17,27 @@
 # limitations under the License.
 #
 
+::Chef::Node.send(:include, Opscode::OpenSSL::Password)
+
 default[:postgresql][:listen] = "localhost"
 default[:postgresql][:port] = "5432"
+default[:postgresql][:hba] = []
+
+default[:postgresql][:test][:listen] = "localhost"
+default[:postgresql][:test][:port] = "5433"
+
+set_unless[:postgresql][:test][:tester_password] = secure_password
+default[:postgresql][:test][:hba] = [
+  {
+    :comment => "tester - all hosts",
+    :type => "host",
+    :database => "all",
+    :user => "tester",
+    :address => "127.0.0.1/0",
+    :method => "md5",
+  },
+
+]
 
 case platform
 when "debian"
@@ -30,6 +49,7 @@ when "debian"
   end
 
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
+  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 
 when "ubuntu"
@@ -41,6 +61,7 @@ when "ubuntu"
   end
 
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
+  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 
 when "fedora"
@@ -52,6 +73,7 @@ when "fedora"
   end
 
   set[:postgresql][:dir] = "/var/lib/pgsql/data"
+  set[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
   set[:postgresql][:contrib_dir] = "/usr/share/pgsql/contrib"
 
 when "redhat","centos"
@@ -69,12 +91,12 @@ when "suse"
   end
 
   set[:postgresql][:dir] = "/var/lib/pgsql/data"
+  set[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/contrib"
 
 else
   default[:postgresql][:version] = "8.4"
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
+  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 end
-
-default[:postgresql][:hba] = []
