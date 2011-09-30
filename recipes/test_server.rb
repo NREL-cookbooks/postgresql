@@ -53,5 +53,5 @@ end
 postgresql_user "tester" do
   password node[:postgresql][:test][:tester_password]
   server_port node[:postgresql][:test][:port]
-  privileges :createdb => true
+  privileges :superuser => true
 end
