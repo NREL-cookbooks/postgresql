@@ -70,25 +70,32 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
     if postgis
       include_recipe "postgresql::postgis"
 
-      postgis14_sql_file = "postgis.sql"
-      if(platform?("redhat", "centos", "fedora") && node[:kernel][:machine] == "x86_64")
-        postgis14_sql_file = "postgis-64.sql"
-      end
+      if(node[:postgresql][:postgis][:v2])
+        execute "psql #{server_port} -c 'CREATE EXTENSION IF NOT EXISTS postgis' #{params[:name]}" do
+          user "postgres"
+          environment({ "LD_LIBRARY_PATH" => "#{node[:gdal][:lib_path]}:#{node[:postgresql][:prefix]}/lib" })
+        end
+      else
+        postgis14_sql_file = "postgis.sql"
+        if(platform?("redhat", "centos", "fedora") && node[:kernel][:machine] == "x86_64")
+          postgis14_sql_file = "postgis-64.sql"
+        end
 
-      # PostGIS 1.4 and above.
-      execute "psql #{server_port} -1 -f #{contrib}/#{postgis14_sql_file} #{params[:name]}" do
-        user "postgres"
-        only_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
-      end
+        # PostGIS 1.4 and above.
+        execute "psql #{server_port} -1 -f #{contrib}/#{postgis14_sql_file} #{params[:name]}" do
+          user "postgres"
+          only_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
+        end
 
-      # PostGIS 1.3 and below.
-      execute "psql #{server_port} -1 -f #{contrib}/lwpostgis.sql #{params[:name]}" do
-        user "postgres"
-        not_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
-      end
+        # PostGIS 1.3 and below.
+        execute "psql #{server_port} -1 -f #{contrib}/lwpostgis.sql #{params[:name]}" do
+          user "postgres"
+          not_if { File.exists? "#{contrib}/#{postgis14_sql_file}" }
+        end
 
-      modules << "spatial_ref_sys"
-      modules << "postgis_comments"
+        modules << "spatial_ref_sys"
+        modules << "postgis_comments"
+      end
     end
 
     modules.uniq.each do |mod|

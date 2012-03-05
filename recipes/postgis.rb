@@ -19,5 +19,55 @@
 
 include_recipe "postgresql::server"
 
-package "postgis"
-package "postgresql-#{node.postgresql.version}-postgis" if %w( debian ubuntu ).include?(node.platform)
+if(!node[:postgresql][:postgis][:v2])
+  node.set[:postgresql][:postgis_dir] = node[:postgresql][:contrib_dir]
+
+  if platform?("redhat", "centos", "scientific", "fedora")
+    package "postgis#{node[:postgresql][:version_no_dot]}"
+  elsif platform?("debian", "ubuntu")
+    package "postgresql-#{node.postgresql.version}-postgis"
+  else
+    package "postgis"
+  end
+else
+  include_recipe "build-essential"
+  include_recipe "gdal"
+
+  package "geos-devel"
+
+  version = "2.0.0beta2SVN"
+  name = "postgis-#{version}"
+  archive = "#{name}.tar.gz"
+
+  node.set[:postgresql][:postgis_dir] = "#{node[:postgresql][:contrib_dir]}/postgis-2.0"
+
+  remote_file "#{Chef::Config[:file_cache_path]}/#{archive}" do
+    source "http://postgis.refractions.net/download/#{archive}"
+  end
+
+  bash "install_postgis" do
+    cwd Chef::Config[:file_cache_path]
+
+    code <<-EOS
+      tar zxf #{archive}
+      cd #{name}
+      ./configure --with-raster --without-topology
+      make
+      make install
+      make comments-install
+
+      cd extensions
+      cd postgis
+      make clean
+      make
+      make install
+
+      cd ../..
+      rm -rf #{name}
+    EOS
+
+    not_if do
+      ::File.exists?(node[:postgresql][:postgis_dir]) && system("grep '^-- INSTALL VERSION: #{version}$' #{node[:postgresql][:postgis_dir]}/postgis.sql > /dev/null")
+    end
+  end
+end

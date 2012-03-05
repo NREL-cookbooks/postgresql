@@ -17,11 +17,13 @@
 # limitations under the License.
 #
 
+include_recipe "yum::pgdg"
+
 case node.platform
 when "ubuntu","debian"
   package "postgresql-client"
   package "libpq-dev"
 when "redhat", "centos", "fedora", "suse"
-  package "postgresql"
-  package "postgresql-devel"
+  package "postgresql#{node[:postgresql][:version_no_dot]}"
+  package "postgresql#{node[:postgresql][:version_no_dot]}-devel"
 end

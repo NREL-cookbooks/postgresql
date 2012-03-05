@@ -10,11 +10,11 @@
 include_recipe "iptables::postgresql_test"
 include_recipe "postgresql::server"
 
-link "/etc/init.d/postgresql-test" do
-  to "/etc/init.d/postgresql"
+link "/etc/init.d/postgresql-#{node[:postgresql][:version]}-test" do
+  to "/etc/init.d/postgresql-#{node[:postgresql][:version]}"
 end
 
-template "/etc/sysconfig/pgsql/postgresql-test" do
+template "/etc/sysconfig/pgsql/postgresql-#{node[:postgresql][:version]}-test" do
   source "redhat.sysconfig.erb"
   owner "root"
   group "root"
@@ -23,7 +23,7 @@ template "/etc/sysconfig/pgsql/postgresql-test" do
   notifies :restart, "service[postgresql-test]"
 end
 
-execute "/sbin/service postgresql-test initdb" do
+execute "/sbin/service postgresql-#{node[:postgresql][:version]}-test initdb" do
   not_if { ::FileTest.exist?(File.join(node[:postgresql][:test][:dir], "PG_VERSION")) }
 end
 
@@ -42,10 +42,11 @@ template "#{node[:postgresql][:test][:dir]}/postgresql.conf" do
   group "postgres"
   mode 0600
   variables node[:postgresql][:test]
-  notifies :restart, "service[postgresql-test]"
+  notifies :restart, "service[postgresql-test]", :immediately
 end
 
 service "postgresql-test" do
+  service_name "postgresql-#{node[:postgresql][:version]}-test"
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
 end

@@ -64,23 +64,14 @@ when "ubuntu"
   set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 
-when "fedora"
+when "redhat", "centos", "scientific", "fedora"
 
-  if platform_version.to_f <= 12
-    default[:postgresql][:version] = "8.3"
-  else
-    default[:postgresql][:version] = "8.4"
-  end
+  default[:postgresql][:version] = "9.1"
+  set[:postgresql][:dir] = "/var/lib/pgsql/#{node[:postgresql][:version]}/data"
+  set[:postgresql][:prefix] = "/usr/pgsql-#{node[:postgresql][:version]}"
+  set[:postgresql][:contrib_dir] = "/usr/pgsql-#{node[:postgresql][:version]}/share/contrib"
 
-  set[:postgresql][:dir] = "/var/lib/pgsql/data"
-  set[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
-  set[:postgresql][:contrib_dir] = "/usr/share/pgsql/contrib"
-
-when "redhat","centos"
-
-  default[:postgresql][:version] = "8.4"
-  set[:postgresql][:dir] = "/var/lib/pgsql/data"
-  set[:postgresql][:contrib_dir] = "/usr/share/pgsql/contrib"
+  set[:postgresql][:test][:dir] = "/var/lib/pgsql/#{node[:postgresql][:version]}/test_data"
 
 when "suse"
 
@@ -100,3 +91,5 @@ else
   set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
   set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 end
+
+default[:postgresql][:postgis][:v2] = false

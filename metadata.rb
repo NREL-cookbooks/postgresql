@@ -3,10 +3,15 @@ maintainer_email  "cookbooks@opscode.com"
 license           "Apache 2.0"
 description       "Installs and configures PostgreSQL for clients or servers"
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
-version           "0.11.1"
+version           "0.11.2"
 
 depends "iptables"
 depends "openssl"
+depends "yum"
+
+# FIXME: Temporary dependencies for building PostGIS 2.0 beta from scratch.
+depends "gdal"
+depends "build-essential"
 
 recipe            "postgresql", "Empty, use one of the other recipes"
 recipe            "postgresql::client", "Installs PostgreSQL client package(s)"

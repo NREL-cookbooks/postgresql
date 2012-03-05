@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+include_recipe "yum::pgdg"
 include_recipe "postgresql::client"
 
 # Create a group and user like the package will.
@@ -42,9 +43,9 @@ user "postgres" do
   supports :non_unique => true
 end
 
-package "postgresql-server"
+package "postgresql#{node[:postgresql][:version_no_dot]}-server"
 
-template "/etc/sysconfig/pgsql/postgresql" do
+template "/etc/sysconfig/pgsql/postgresql-#{node[:postgresql][:version]}" do
   source "redhat.sysconfig.erb"
   owner "root"
   group "root"
@@ -53,8 +54,8 @@ template "/etc/sysconfig/pgsql/postgresql" do
   notifies :restart, "service[postgresql]"
 end
 
-execute "/sbin/service postgresql initdb" do
-  not_if { ::FileTest.exist?(File.join(node.postgresql.dir, "PG_VERSION")) }
+execute "/sbin/service postgresql-#{node[:postgresql][:version]} initdb" do
+  not_if { ::FileTest.exist?(File.join(node[:postgresql][:dir], "PG_VERSION")) }
 end
 
 template "#{node[:postgresql][:dir]}/pg_hba.conf" do
@@ -72,10 +73,25 @@ template "#{node[:postgresql][:dir]}/postgresql.conf" do
   group "postgres"
   mode 0600
   variables node[:postgresql]
-  notifies :restart, "service[postgresql]"
+  notifies :restart, "service[postgresql]", :immediately
 end
 
 service "postgresql" do
+  service_name "postgresql-#{node[:postgresql][:version]}"
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
+end
+
+if platform?("redhat", "centos", "scientific", "fedora")
+  unless(ENV["PATH"] =~ /#{node[:postgresql][:prefix]}/)
+    ENV["PATH"] = "#{node[:postgresql][:prefix]}/bin:#{ENV["PATH"]}"
+    ENV["LD_LIBRARY_PATH"] = "#{node[:postgresql][:prefix]}/lib:#{ENV["LD_LIBRARY_PATH"]}"
+  end
+
+  template "/etc/profile.d/postgresql.sh" do
+    source "profile.sh.erb"
+    mode "0644"
+    owner "root"
+    group "root"
+  end
 end
