@@ -45,6 +45,12 @@ end
 
 package "postgresql#{node[:postgresql][:version_no_dot]}-server"
 
+bash "fix_9.1_init" do
+  code <<-EOS
+    perl -p -i -e 's#pidfile="/var/run/postmaster-9.1.pid"#pidfile="/var/run/postmaster-9.1.${PGPORT}.pid"#' /etc/rc.d/init.d/postgresql-#{node[:postgresql][:version]}
+  EOS
+end
+
 template "/etc/sysconfig/pgsql/postgresql-#{node[:postgresql][:version]}" do
   source "redhat.sysconfig.erb"
   owner "root"

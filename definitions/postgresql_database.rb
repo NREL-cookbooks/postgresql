@@ -71,10 +71,16 @@ define :postgresql_database, :action => :create, :owner => "postgres" do
       include_recipe "postgresql::postgis"
 
       if(node[:postgresql][:postgis][:v2])
+        #execute "psql #{server_port} -c 'DROP EXTENSION postgis' #{params[:name]}" do
+        #  user "postgres"
+        #  environment({ "LD_LIBRARY_PATH" => "#{node[:gdal][:lib_path]}:#{node[:postgresql][:prefix]}/lib" })
+        #end
+
         execute "psql #{server_port} -c 'CREATE EXTENSION IF NOT EXISTS postgis' #{params[:name]}" do
           user "postgres"
           environment({ "LD_LIBRARY_PATH" => "#{node[:gdal][:lib_path]}:#{node[:postgresql][:prefix]}/lib" })
         end
+
       else
         postgis14_sql_file = "postgis.sql"
         if(platform?("redhat", "centos", "fedora") && node[:kernel][:machine] == "x86_64")

@@ -35,7 +35,7 @@ else
 
   package "geos-devel"
 
-  version = "2.0.0beta2SVN"
+  version = "2.0.0"
   name = "postgis-#{version}"
   archive = "#{name}.tar.gz"
 
@@ -49,25 +49,46 @@ else
     cwd Chef::Config[:file_cache_path]
 
     code <<-EOS
+      #export LD_LIBRARY_PATH="#{node[:gdal][:lib_path]}:#{node[:postgresql][:prefix]}/lib"
+      #export PATH="#{node[:gdal][:bin_path]}:$PATH"
+      echo $LD_LIBRARY_PATH
+      echo $PATH
+
+      rm -rf #{name}
       tar zxf #{archive}
       cd #{name}
+      echo "=== configure... ==="
       ./configure --with-raster --without-topology
+      echo "=== make... ==="
       make
+      echo "=== make install... ==="
       make install
+      echo "=== make comments-install... ==="
       make comments-install
 
       cd extensions
       cd postgis
+      echo "=== extension: make clean... ==="
       make clean
+      echo "=== extension: make... ==="
       make
+      echo "=== extension: make install... ==="
       make install
+      echo "=== extension: DONE... ==="
 
       cd ../..
       rm -rf #{name}
     EOS
+
+    environment({ "LD_LIBRARY_PATH" => "#{node[:gdal][:lib_path]}:#{node[:postgresql][:prefix]}/lib", "PATH" => "#{node[:gdal][:bin_path]}:#{ENV["PATH"]}" })
 
     not_if do
       ::File.exists?(node[:postgresql][:postgis_dir]) && system("grep '^-- INSTALL VERSION: #{version}$' #{node[:postgresql][:postgis_dir]}/postgis.sql > /dev/null")
     end
   end
 end
+
+
+# INSERT into spatial_ref_sys (srid, auth_name, auth_srid, proj4text, srtext) values ( 912003, 'esri', 102003, '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ', 'PROJCS["USA_Contiguous_Albers_Equal_Area_Conic",GEOGCS["GCS_North_American_1983",DATUM["North_American_Datum_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["False_Easting",0],PARAMETER["False_Northing",0],PARAMETER["longitude_of_center",-96],PARAMETER["Standard_Parallel_1",29.5],PARAMETER["Standard_Parallel_2",45.5],PARAMETER["latitude_of_center",37.5],UNIT["Meter",1],AUTHORITY["EPSG","102003"]]');
+#
+# TEST DB TOO!
