@@ -2,7 +2,9 @@
 # Cookbook Name:: postgresql
 # Recipe:: server
 #
-# Copyright 2009-2010, Opscode, Inc.
+# Author:: Joshua Timberman (<joshua@opscode.com>)
+# Author:: Lamont Granquist (<lamont@opscode.com>)#
+# Copyright 2009-2011, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,17 +21,34 @@
 
 include_recipe "postgresql::client"
 
-node.default[:postgresql][:ssl] = node[:postgresql][:version].to_f > 8.3
+case node[:postgresql][:version]
+when "8.3"
+  node.default[:postgresql][:ssl] = "off"
+else # > 8.3
+  node.default[:postgresql][:ssl] = "true"
+end
 
 package "postgresql"
 
-template "#{node[:postgresql][:dir]}/pg_hba.conf" do
-  source "debian.pg_hba.conf.erb"
-  owner "postgres"
-  group "postgres"
-  mode 0600
-  variables node[:postgresql]
-  notifies :reload, "service[postgresql]"
+service "postgresql" do
+  case node['platform']
+  when "ubuntu"
+    case
+    when node['platform_version'].to_f <= 10.04
+      service_name "postgresql-#{node['postgresql']['version']}"
+    else
+      service_name "postgresql"
+    end
+  when "debian"
+    case
+    when node['platform_version'].to_f <= 5.0
+      service_name "postgresql-#{node['postgresql']['version']}"
+    else
+      service_name "postgresql"
+    end
+  end
+  supports :restart => true, :status => true, :reload => true
+  action :nothing
 end
 
 template "#{node[:postgresql][:dir]}/postgresql.conf" do
@@ -37,12 +56,5 @@ template "#{node[:postgresql][:dir]}/postgresql.conf" do
   owner "postgres"
   group "postgres"
   mode 0600
-  variables node[:postgresql]
-  notifies :restart, "service[postgresql]"
-end
-
-service "postgresql" do
-  service_name "postgresql-#{node.postgresql.version}"
-  supports :restart => true, :status => true, :reload => true
-  action :nothing
+  notifies :restart, resources(:service => "postgresql")
 end

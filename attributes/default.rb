@@ -17,61 +17,51 @@
 # limitations under the License.
 #
 
-::Chef::Node.send(:include, Opscode::OpenSSL::Password)
-
 default[:postgresql][:listen] = "localhost"
 default[:postgresql][:port] = "5432"
 default[:postgresql][:hba] = []
 
-default[:postgresql][:test][:listen] = "localhost"
-default[:postgresql][:test][:port] = "5433"
-
-set_unless[:postgresql][:test][:tester_password] = secure_password
-default[:postgresql][:test][:hba] = [
-  {
-    :comment => "tester - all hosts",
-    :type => "host",
-    :database => "all",
-    :user => "tester",
-    :address => "127.0.0.1/0",
-    :method => "md5",
-  },
-
-]
-
 case platform
 when "debian"
 
-  if platform_version.to_f == 5.0
+  case
+  when platform_version.to_f <= 5.0
     default[:postgresql][:version] = "8.3"
-  elsif platform_version =~ /.*sid/
+  when platform_version.to_f == 6.0
     default[:postgresql][:version] = "8.4"
+  else
+    default[:postgresql][:version] = "9.1"
   end
 
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
-  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
-  set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
 
 when "ubuntu"
 
-  if platform_version.to_f <= 9.04
+  case
+  when platform_version.to_f <= 9.04
+    default[:postgresql][:version] = "8.3"
+  when platform_version.to_f <= 11.04
+    default[:postgresql][:version] = "8.4"
+  else
+    default[:postgresql][:version] = "9.1"
+  end
+
+  set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
+
+when "fedora"
+
+  if platform_version.to_f <= 12
     default[:postgresql][:version] = "8.3"
   else
     default[:postgresql][:version] = "8.4"
   end
 
-  set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
-  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
-  set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
+  set[:postgresql][:dir] = "/var/lib/pgsql/data"
 
-when "redhat", "centos", "scientific", "fedora"
+when "redhat","centos","scientific","amazon"
 
-  default[:postgresql][:version] = "9.1"
-  set[:postgresql][:dir] = "/var/lib/pgsql/#{node[:postgresql][:version]}/data"
-  set[:postgresql][:prefix] = "/usr/pgsql-#{node[:postgresql][:version]}"
-  set[:postgresql][:contrib_dir] = "/usr/pgsql-#{node[:postgresql][:version]}/share/contrib"
-
-  set[:postgresql][:test][:dir] = "/var/lib/pgsql/#{node[:postgresql][:version]}/test_data"
+  default[:postgresql][:version] = "8.4"
+  set[:postgresql][:dir] = "/var/lib/pgsql/data"
 
 when "suse"
 
@@ -82,14 +72,8 @@ when "suse"
   end
 
   set[:postgresql][:dir] = "/var/lib/pgsql/data"
-  set[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
-  set[:postgresql][:contrib_dir] = "/usr/share/postgresql/contrib"
 
 else
   default[:postgresql][:version] = "8.4"
-  set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
-  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
-  set[:postgresql][:contrib_dir] = "/usr/share/postgresql/#{node[:postgresql][:version]}/contrib"
+  set[:postgresql][:dir]         = "/etc/postgresql/#{node[:postgresql][:version]}/main"
 end
-
-default[:postgresql][:postgis][:v2] = false

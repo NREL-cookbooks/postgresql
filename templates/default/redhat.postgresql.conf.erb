@@ -108,7 +108,7 @@ ssl = <%= @ssl ? "on" : "off" %>        # (change requires restart)
 
 # - Memory -
 
-shared_buffers = 24MB                   # min 128kB
+shared_buffers = 32MB                   # min 128kB
                                         # (change requires restart)
 #temp_buffers = 8MB                     # min 800kB
 #max_prepared_transactions = 0          # zero disables the feature
@@ -352,7 +352,7 @@ log_rotation_size = 0                   # Automatic rotation of logfiles will
                                         #   %q = stop here in non-session
                                         #        processes
                                         #   %% = '%'
-                                        # e.g. '<%u%%%d> '
+                                        # e.g. '<%%u%%%d> '
 #log_lock_waits = off                   # log lock waits >= deadlock_timeout
 #log_statement = 'none'                 # none, ddl, mod, all
 #log_temp_files = -1                    # log temporary files equal or larger

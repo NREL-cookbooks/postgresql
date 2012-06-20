@@ -1,7 +1,12 @@
+#
+# Cookbook Name:: postgresql
+# Recipe:: postgis_client
+#
+# Copyright 2012, NREL
+#
+# All rights reserved - Do Not Redistribute
+#
+
 include_recipe "postgresql::client"
 
-package "postgis"
-
-link "/usr/share/pgsql/contrib/postgis.sql" do
- to "/usr/share/pgsql/contrib/postgis-64.sql"
-end
+package "postgis2_#{node[:postgresql][:version_no_dot]}"
