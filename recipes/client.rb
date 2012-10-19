@@ -19,24 +19,28 @@
 # limitations under the License.
 #
 
-pg_packages = case node['platform']
-when "ubuntu","debian"
-  %w{postgresql-client libpq-dev make}
-when "fedora","suse","amazon"
-  %w{postgresql-devel}
-when "redhat","centos","scientific"
-  case
-  when node['platform_version'].to_f >= 6.0
+if(node[:postgresql][:install_repo] == "pgdg")
+  include_recipe "postgresql::client_pgdg"
+else
+  pg_packages = case node['platform']
+  when "ubuntu","debian"
+    %w{postgresql-client libpq-dev make}
+  when "fedora","suse","amazon"
     %w{postgresql-devel}
-  else
-    [ "postgresql#{node['postgresql']['version'].split('.').join}-devel" ]
+  when "redhat","centos","scientific"
+    case
+    when node['platform_version'].to_f >= 6.0
+      %w{postgresql-devel}
+    else
+      [ "postgresql#{node['postgresql']['version'].split('.').join}-devel" ]
+    end
   end
-end
 
-pg_packages.each do |pg_pack|
-  package pg_pack do
-    action :nothing
-  end.run_action(:install)
+  pg_packages.each do |pg_pack|
+    package pg_pack do
+      action :nothing
+    end.run_action(:install)
+  end
 end
 
 gem_package "pg" do

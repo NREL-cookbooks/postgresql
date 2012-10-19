@@ -36,11 +36,15 @@ end
 
 # Include the right "family" recipe for installing the server
 # since they do things slightly differently.
-case node.platform
-when "redhat", "centos", "fedora", "suse", "scientific", "amazon"
-  include_recipe "postgresql::server_redhat"
-when "debian", "ubuntu"
-  include_recipe "postgresql::server_debian"
+if(node[:postgresql][:install_repo] == "pgdg")
+  include_recipe "postgresql::server_pgdg"
+else
+  case node.platform
+  when "redhat", "centos", "fedora", "suse", "scientific", "amazon"
+    include_recipe "postgresql::server_redhat"
+  when "debian", "ubuntu"
+    include_recipe "postgresql::server_debian"
+  end
 end
 
 template "#{node[:postgresql][:dir]}/pg_hba.conf" do
@@ -48,6 +52,7 @@ template "#{node[:postgresql][:dir]}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 0600
+  variables node[:postgresql]
   notifies :reload, resources(:service => "postgresql"), :immediately
 end
 
@@ -58,14 +63,14 @@ end
 bash "assign-postgres-password" do
   user 'postgres'
   code <<-EOH
-echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:postgres]}';" | psql
+echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:postgres]}';" | psql -p #{node[:postgresql][:port]}
   EOH
   not_if do
     begin
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect("localhost", 5432, nil, nil, nil, "postgres", node['postgresql']['password']['postgres'])
+      conn = PGconn.connect("localhost", node[:postgresql][:port], nil, nil, nil, "postgres", node['postgresql']['password']['postgres'])
     rescue PGError
       false
     end

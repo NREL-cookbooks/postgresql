@@ -81,3 +81,14 @@ local   all         all                               ident
 host    all         all         127.0.0.1/32          md5
 # IPv6 local connections:
 host    all         all         ::1/128               md5
+
+<% if(node.recipe?("nagios::client")) %>
+# Allow the limited nagios user local, password-less connections to check the
+# server status.
+host    all         nagios       127.0.0.1/32         trust
+<% end %>
+
+<% @hba.each do |hba| %>
+# <%= hba[:comment] %>
+<%= hba[:type] %>  <%= hba[:database] %>  <%= hba[:user] %>  <%= hba[:address] %>  <%= hba[:method] %>
+<% end %>

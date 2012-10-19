@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+default[:postgresql][:listen] = "localhost"
+default[:postgresql][:port] = "5432"
+default[:postgresql][:hba] = []
+
 case platform
 when "debian"
 
