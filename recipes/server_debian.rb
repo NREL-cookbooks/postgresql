@@ -28,7 +28,11 @@ else # > 8.3
   node.default[:postgresql][:ssl] = "true"
 end
 
-package "postgresql"
+node['postgresql']['server']['packages'].each do |pg_pack|
+  package pg_pack do
+    action :install
+  end
+end
 
 service "postgresql" do
   case node['platform']
@@ -56,5 +60,5 @@ template "#{node[:postgresql][:dir]}/postgresql.conf" do
   owner "postgres"
   group "postgres"
   mode 0600
-  notifies :restart, resources(:service => "postgresql")
+  notifies :restart, resources(:service => "postgresql"), :immediately
 end
