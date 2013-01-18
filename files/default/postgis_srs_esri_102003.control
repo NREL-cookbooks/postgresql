@@ -1,0 +1,3 @@
+comment = 'Installs the ESRI 102003 projection into PostGIS'
+default_version = '1.0'
+relocatable = true
