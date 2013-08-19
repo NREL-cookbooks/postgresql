@@ -45,3 +45,19 @@ package repo_rpm_package do
   source "#{Chef::Config[:file_cache_path]}/#{repo_rpm_filename}"
   action :install
 end
+
+# Add the PGDG install path to the default path.
+prefix = "/usr/pgsql-#{node[:postgresql][:version]}"
+
+unless(ENV["PATH"] =~ /#{prefix}/)
+  ENV["PATH"] = "#{prefix}/bin:#{ENV["PATH"]}"
+  ENV["LD_LIBRARY_PATH"] = "#{prefix}/lib:#{ENV["LD_LIBRARY_PATH"]}"
+end
+
+template "/etc/profile.d/postgresql.sh" do
+  source "profile.sh.erb"
+  mode "0644"
+  owner "root"
+  group "root"
+  variables :prefix => prefix
+end
