@@ -21,8 +21,6 @@
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-chef_gem "pg"
-
 include_recipe "postgresql::client"
 
 # randomly generate postgres password, unless using solo - see README
