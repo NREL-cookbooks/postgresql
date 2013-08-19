@@ -62,6 +62,7 @@ template "#{node['postgresql']['dir']}/postgresql.conf" do
   owner "postgres"
   group "postgres"
   mode 0600
+  variables(:config => node[:postgresql][:config])
   notifies :reload, 'service[postgresql]', :immediately
 end
 
@@ -70,6 +71,7 @@ template "#{node['postgresql']['dir']}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 00600
+  variables(:pg_hba => node[:postgresql][:pg_hba])
   notifies :reload, 'service[postgresql]', :immediately
 end
 

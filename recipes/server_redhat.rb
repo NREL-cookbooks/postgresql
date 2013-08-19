@@ -54,6 +54,7 @@ end
 template "/etc/sysconfig/pgsql/#{node['postgresql']['server']['service_name']}" do
   source "pgsql.sysconfig.erb"
   mode "0644"
+  variables(:dir => node[:postgresql][:dir], :config => node[:postgresql][:config])
   notifies :restart, "service[postgresql]", :delayed
 end
 

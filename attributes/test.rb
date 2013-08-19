@@ -1,21 +1,31 @@
-default[:postgresql][:test][:listen] = "localhost"
-default[:postgresql][:test][:port] = "5433"
-default[:postgresql][:test][:hba] = [
+default[:postgresql][:test][:config][:listen_addresses] = "localhost"
+default[:postgresql][:test][:config][:port] = 5433
+default[:postgresql][:test][:pg_hba] = [
+  {:type => 'local', :db => 'all', :user => 'postgres', :addr => nil, :method => 'ident'},
+  {:type => 'local', :db => 'all', :user => 'all', :addr => nil, :method => 'ident'},
+  {:type => 'host', :db => 'all', :user => 'all', :addr => '127.0.0.1/32', :method => 'md5'},
+  {:type => 'host', :db => 'all', :user => 'all', :addr => '::1/128', :method => 'md5'},
   {
-    :comment => "tester - all hosts",
+    :comment => "# tester - all hosts",
     :type => "host",
-    :database => "all",
+    :db => "all",
     :user => "tester",
-    :address => "127.0.0.1/0",
+    :addr => "127.0.0.1/0",
     :method => "md5",
   },
 ]
 
-case platform
-when "debian", "ubuntu"
-  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
-when "fedora", "redhat", "centos", "scientific", "amazon", "suse"
-  set[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
+case node['platform_family']
+when 'debian'
+  default[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
+when 'rhel'
+  if node['platform_version'].to_f >= 6.0 && node['postgresql']['version'] != '8.4'
+    default[:postgresql][:test][:dir] = "/var/lib/pgsql/#{node[:postgresql][:version]}/test"
+  else
+    default[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
+  end
+when 'fedora', 'suse'
+  default[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
 else
-  set[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
+  default[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
 end

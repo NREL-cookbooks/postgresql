@@ -28,41 +28,41 @@ link "/etc/init.d/postgresql-#{node[:postgresql][:version]}-test" do
   to "/etc/init.d/postgresql-#{node[:postgresql][:version]}"
 end
 
-template "/etc/sysconfig/pgsql/postgresql-#{node[:postgresql][:version]}-test" do
-  source "redhat.sysconfig.erb"
-  owner "root"
-  group "root"
+config = node[:postgresql][:config].merge(node[:postgresql][:test][:config])
+
+template "/etc/sysconfig/pgsql/#{node['postgresql']['server']['service_name']}-test" do
+  source "pgsql.sysconfig.erb"
   mode "0644"
-  variables node[:postgresql][:test]
-  notifies :restart, "service[postgresql-test]"
+  variables(:dir => node[:postgresql][:test][:dir], :config => config)
+  notifies :restart, "service[postgresql]", :delayed
 end
 
 execute "/sbin/service postgresql-#{node[:postgresql][:version]}-test initdb" do
   not_if { ::FileTest.exist?(File.join(node[:postgresql][:test][:dir], "PG_VERSION")) }
 end
 
-template "#{node[:postgresql][:test][:dir]}/pg_hba.conf" do
-  source "pg_hba.conf.erb"
-  owner "postgres"
-  group "postgres"
-  mode 0600
-  variables node[:postgresql][:test]
-  notifies :reload, "service[postgresql-test]", :immediately
-end
-
 service "postgresql-test" do
-  service_name "postgresql-#{node[:postgresql][:version]}-test"
+  service_name "#{node['postgresql']['server']['service_name']}-test"
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
 end
 
 template "#{node[:postgresql][:test][:dir]}/postgresql.conf" do
-  source "redhat.postgresql.conf.erb"
+  source "postgresql.conf.erb"
   owner "postgres"
   group "postgres"
   mode 0600
-  variables node[:postgresql][:test]
-  notifies :restart, "service[postgresql-test]"
+  variables(:config => config)
+  notifies :reload, 'service[postgresql-test]', :immediately
+end
+
+template "#{node[:postgresql][:test][:dir]}/pg_hba.conf" do
+  source "pg_hba.conf.erb"
+  owner "postgres"
+  group "postgres"
+  mode 00600
+  variables(:pg_hba => node[:postgresql][:test][:pg_hba])
+  notifies :reload, 'service[postgresql-test]', :immediately
 end
 
 # Default PostgreSQL install has 'ident' checking on unix user 'postgres'
@@ -72,14 +72,14 @@ end
 bash "assign-postgres-test-password" do
   user 'postgres'
   code <<-EOH
-echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:test][:password][:postgres]}';" | psql -p #{node[:postgresql][:test][:port]}
+echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:test][:password][:postgres]}';" | psql -p #{config[:port]}
   EOH
   not_if do
     begin
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect("localhost", node[:postgresql][:test][:port], nil, nil, nil, "postgres", node['postgresql']['test']['password']['postgres'])
+      conn = PGconn.connect("localhost", config[:port], nil, nil, nil, "postgres", node['postgresql']['test']['password']['postgres'])
     rescue PGError
       false
     end
@@ -88,12 +88,12 @@ echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:test][:passwo
 end
 
 postgresql_database_user "tester" do
-  connection :host => "localhost", :port => node[:postgresql][:test][:port], :password => node[:postgresql][:test][:password][:postgres]
+  connection :host => "localhost", :port => config[:port], :password => node[:postgresql][:test][:password][:postgres]
   password node[:postgresql][:test][:password][:tester]
 end
 
 postgresql_database "template1" do
-  connection :host => "localhost", :port => node[:postgresql][:test][:port], :password => node[:postgresql][:test][:password][:postgres]
+  connection :host => "localhost", :port => config[:port], :password => node[:postgresql][:test][:password][:postgres]
   sql "ALTER ROLE tester WITH SUPERUSER"
   action :query
 end
