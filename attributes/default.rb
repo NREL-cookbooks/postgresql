@@ -164,7 +164,7 @@ when 'debian'
 when 'rhel', 'fedora', 'suse'
   default['postgresql']['config']['listen_addresses'] = 'localhost'
   default['postgresql']['config']['max_connections'] = 100
-  default['postgresql']['config']['shared_buffers'] = '32MB'
+  default['postgresql']['config']['shared_buffers'] = '24MB' # Change from 32 to 24 to fit in RHEL's default SHMMAX.
   default['postgresql']['config']['logging_collector'] = true
   default['postgresql']['config']['log_directory'] = 'pg_log'
   default['postgresql']['config']['log_filename'] = 'postgresql-%a.log'
