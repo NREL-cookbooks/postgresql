@@ -23,3 +23,5 @@ end
 depends "apt"
 depends "build-essential"
 depends "openssl"
+
+recommends "database"

@@ -9,6 +9,7 @@
 
 include_recipe "iptables::postgresql_test"
 include_recipe "postgresql::server"
+include_recipe "database::postgresql"
 
 # randomly generate postgres password
 node.set_unless[:postgresql][:test][:password][:postgres] = secure_password
