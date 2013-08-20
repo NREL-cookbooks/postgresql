@@ -9,4 +9,4 @@
 
 include_recipe "postgresql::client"
 
-package "postgis2_#{node[:postgresql][:version_no_dot]}"
+package "postgis2_#{node['postgresql']['version'].split('.').join}"

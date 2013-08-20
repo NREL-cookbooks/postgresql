@@ -9,7 +9,7 @@
 
 include_recipe "postgresql::server"
 
-package "postgis2_#{node[:postgresql][:version_no_dot]}" do
+package "postgis2_#{node['postgresql']['version'].split('.').join}" do
   # Disable rpmforge while installing postgis. Without this a newer, but
   # incompatible, version of hdf5 gets installed. We want the hdf5 library from
   # epel.
