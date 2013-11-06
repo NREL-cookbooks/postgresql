@@ -20,10 +20,12 @@ define :postgis_database, :action => :create do
       end
     end
 
-    postgresql_database params[:name] do
-      connection params[:connection]
-      sql "CREATE EXTENSION IF NOT EXISTS postgis_srs_esri_102003"
-      action :query
+    %w(postgis_srs_esri_102003 postgis_srs_sr_org_6703).each do |extension|
+      postgresql_database params[:name] do
+        connection params[:connection]
+        sql "CREATE EXTENSION IF NOT EXISTS #{extension}"
+        action :query
+      end
     end
   end
 end

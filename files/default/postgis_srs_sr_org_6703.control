@@ -1,0 +1,3 @@
+comment = 'Installs the SR-ORG 6703 projection into PostGIS'
+default_version = '1.0'
+relocatable = true
