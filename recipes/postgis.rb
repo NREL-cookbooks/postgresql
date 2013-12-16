@@ -14,6 +14,7 @@ package "postgis2_#{node['postgresql']['version'].split('.').join}" do
   # incompatible, version of hdf5 gets installed. We want the hdf5 library from
   # epel.
   options "--disablerepo=rpmforge"
+  version node[:postgresql][:postgis_package_version]
 end
 
 prefix = "/usr/pgsql-#{node[:postgresql][:version]}"
