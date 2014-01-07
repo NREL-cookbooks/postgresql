@@ -1,4 +1,4 @@
 PGDATA=<%= @dir %>
-<% if @config.attribute?("port") -%>
+<% if @config.key?("port") -%>
 PGPORT=<%= @config['port'] %>
 <% end -%>
