@@ -73,7 +73,7 @@ template "#{node['postgresql']['dir']}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 00600
-  variables(:pg_hba => node[:postgresql][:pg_hba])
+  variables(:pg_hba => node[:postgresql][:pg_hba], :version => node[:postgresql][:version])
   notifies change_notify, 'service[postgresql]', :immediately
 end
 
@@ -88,7 +88,7 @@ end
 bash "assign-postgres-password" do
   user 'postgres'
   code <<-EOH
-echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node['postgresql']['password']['postgres']}';" | psql
+echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node['postgresql']['password']['postgres']}';" | psql -p #{node['postgresql']['config']['port'] || 5432}
   EOH
   action :run
 end

@@ -62,7 +62,7 @@ template "#{node[:postgresql][:test][:dir]}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 00600
-  variables(:pg_hba => node[:postgresql][:test][:pg_hba])
+  variables(:pg_hba => node[:postgresql][:test][:pg_hba], :version => node[:postgresql][:version])
   notifies :reload, 'service[postgresql-test]', :immediately
 end
 
