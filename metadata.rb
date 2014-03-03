@@ -25,3 +25,4 @@ depends "build-essential"
 depends "openssl"
 
 recommends "database"
+recommends "yum-epel"
