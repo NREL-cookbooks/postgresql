@@ -12,11 +12,6 @@ include_recipe "yum-epel"
 
 package "postgis2_#{node['postgresql']['version'].split('.').join}" do
   version node[:postgresql][:postgis_package_version]
-
-  # Disable rpmforge while installing postgis. Without this a newer, but
-  # incompatible, version of hdf5 gets installed. We want the hdf5 library from
-  # epel.
-  options "--disablerepo=rpmforge*"
 end
 
 prefix = "/usr/pgsql-#{node[:postgresql][:version]}"
