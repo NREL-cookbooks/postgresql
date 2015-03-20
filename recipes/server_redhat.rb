@@ -51,6 +51,12 @@ node['postgresql']['server']['packages'].each do |pg_pack|
 
 end
 
+template "/var/lib/pgsql/.bash_profile" do
+  source ".bash_profile.erb"
+  mode "0644"
+  variables(:dir => node[:postgresql][:dir])
+end
+
 template "/etc/sysconfig/pgsql/#{node['postgresql']['server']['service_name']}" do
   source "pgsql.sysconfig.erb"
   mode "0644"

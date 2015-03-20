@@ -1,4 +1,5 @@
 PGDATA=<%= @dir %>
+PGLOG=<%= File.dirname(@dir) %>/pgstartup.log
 <% if @config.key?("port") -%>
 PGPORT=<%= @config['port'] %>
 <% end -%>
