@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::server"
-
 # Install the PostgreSQL contrib package(s) from the distribution,
 # as specified by the node attributes.
 node['postgresql']['contrib']['packages'].each do |pg_pack|
@@ -24,6 +22,8 @@ node['postgresql']['contrib']['packages'].each do |pg_pack|
   package pg_pack
 
 end
+
+include_recipe "postgresql::server"
 
 # Install PostgreSQL contrib extentions into the template1 database,
 # as specified by the node attributes.
