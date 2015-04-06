@@ -294,15 +294,15 @@ default['postgresql']['pgdg']['repo_rpm_url'] = {
     },
     "fedora" => {
       "21" => {
-        "i386" => "http://yum.postgresql.org/9.4/fedora/fedora-21-i686/pgdg-fedora94-9.4-2.noarch.rpm"
+        "i386" => "http://yum.postgresql.org/9.4/fedora/fedora-21-i686/pgdg-fedora94-9.4-2.noarch.rpm",
         "x86_64" => "http://yum.postgresql.org/9.4/fedora/fedora-21-x86_64/pgdg-fedora94-9.4-2.noarch.rpm"
       },
       "20" => {
-        "i386" => "http://yum.postgresql.org/9.4/fedora/fedora-20-i686/pgdg-fedora94-9.4-1.noarch.rpm"
+        "i386" => "http://yum.postgresql.org/9.4/fedora/fedora-20-i686/pgdg-fedora94-9.4-1.noarch.rpm",
         "x86_64" => "http://yum.postgresql.org/9.4/fedora/fedora-20-x86_64/pgdg-fedora94-9.4-1.noarch.rpm"
       },
       "19" => {
-        "i386" => "http://yum.postgresql.org/9.4/fedora/fedora-19-i686/pgdg-fedora94-9.4-1.noarch.rpm"
+        "i386" => "http://yum.postgresql.org/9.4/fedora/fedora-19-i686/pgdg-fedora94-9.4-1.noarch.rpm",
         "x86_64" => "http://yum.postgresql.org/9.4/fedora/fedora-19-x86_64/pgdg-fedora94-9.4-1.noarch.rpm"
       },
     }
