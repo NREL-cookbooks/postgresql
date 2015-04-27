@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+config = node['postgresql']['config']
+pg_hba = node['postgresql']['pg_hba']
+
 change_notify = node['postgresql']['server']['config_change_notify']
 
 template "#{node['postgresql']['dir']}/postgresql.conf" do
@@ -22,7 +25,9 @@ template "#{node['postgresql']['dir']}/postgresql.conf" do
   owner "postgres"
   group "postgres"
   mode 0600
+  variables(:config => config)
   notifies change_notify, 'service[postgresql]', :delayed
+  only_if { config }
 end
 
 template "#{node['postgresql']['dir']}/pg_hba.conf" do
@@ -30,5 +35,7 @@ template "#{node['postgresql']['dir']}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 00600
+  variables(:pg_hba => pg_hba)
   notifies change_notify, 'service[postgresql]', :delayed
+  only_if { pg_hba }
 end

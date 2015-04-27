@@ -20,6 +20,7 @@ include_recipe "postgresql::client"
 svc_name = node['postgresql']['server']['service_name']
 dir = node['postgresql']['dir']
 initdb_locale = node['postgresql']['initdb_locale']
+config = node['postgresql']['config']
 
 # Create a group and user like the package will.
 # Otherwise the templates fail.
@@ -66,6 +67,10 @@ unless platform_family?("fedora") and node['platform_version'].to_i >= 16
   template "/etc/sysconfig/pgsql/#{svc_name}" do
     source "pgsql.sysconfig.erb"
     mode "0644"
+    variables({
+      :dir => dir,
+      :config => config
+    })
     notifies :restart, "service[postgresql]", :delayed
   end
 
@@ -91,4 +96,13 @@ service "postgresql" do
   service_name svc_name
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
+end
+
+template "/var/lib/pgsql/.bash_profile" do
+  source ".bash_profile.erb"
+  owner "postgres"
+  group "postgres"
+  mode 0644
+  variables(:dir => dir)
+  only_if { dir } 
 end
