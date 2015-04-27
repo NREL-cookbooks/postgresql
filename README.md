@@ -15,7 +15,7 @@ Requirements
 
 Tested on:
 
-* Ubuntu 10.04, 11.10, 12.04
+* Ubuntu 10.04, 11.10, 12.04, 14.04, 14.10
 * Red Hat 6.1, Scientific 6.1, CentOS 6.3
 
 ## Cookbooks
@@ -109,7 +109,7 @@ is. So for example:
     node.default['postgresql']['config']['logging_collector'] = true
     node.default['postgresql']['config']['datestyle'] = 'iso, mdy'
     node.default['postgresql']['config']['ident_file'] = nil
-    node.default['postgresql']['config']['port] = 5432
+    node.default['postgresql']['config']['port'] = 5432
 
 Will result in the following config lines:
 
@@ -132,8 +132,8 @@ the array must be symbols. Each hash will be written as a line in
 `pg_hba.conf`. For example, this entry from
 `node['postgresql']['pg_hba']`:
 
-    {:comment => '# Optional comment',
-    :type => 'local', :db => 'all', :user => 'postgres', :addr => nil, :method => 'md5'}
+    [{:comment => '# Optional comment',
+    :type => 'local', :db => 'all', :user => 'postgres', :addr => nil, :method => 'md5'}]
 
 Will result in the following line in `pg_hba.conf`:
 
@@ -337,6 +337,10 @@ loads its shared library, which can be done with this node attribute:
 
     node['postgresql']['config']['shared_preload_libraries'] = 'pg_stat_statements'
 
+If using `shared_preload_libraries` in combination with the `contrib` recipe,
+make sure that the `contrib` recipe is called before the `server` recipe (to
+ensure the dependencies are installed and setup in order).
+
 apt\_pgdg\_postgresql
 ----------------------
 
@@ -444,6 +448,7 @@ License and Author
 - Author:: Lamont Granquist (<lamont@opscode.com>)
 - Author:: Chris Roberts (<chrisroberts.code@gmail.com>)
 - Author:: David Crane (<davidc@donorschoose.org>)
+- Author:: Aaron Baer (<aaron@hw-ops.com>)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
