@@ -34,7 +34,7 @@ config = node[:postgresql][:config].merge(node[:postgresql][:test][:config])
 template "/etc/sysconfig/pgsql/#{node['postgresql']['server']['service_name']}-test" do
   source "pgsql.sysconfig.erb"
   mode "0644"
-  variables(:dir => node[:postgresql][:test][:dir], :config => config)
+  variables(:dir => node[:postgresql][:test][:dir], :config => config, :svc_name => "#{node['postgresql']['server']['service_name']}-test")
   notifies :restart, "service[postgresql]", :delayed
 end
 

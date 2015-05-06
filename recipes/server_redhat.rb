@@ -69,7 +69,8 @@ unless platform_family?("fedora") and node['platform_version'].to_i >= 16
     mode "0644"
     variables({
       :dir => dir,
-      :config => config
+      :config => config,
+      :svc_name => svc_name,
     })
     notifies :restart, "service[postgresql]", :delayed
   end

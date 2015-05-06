@@ -1,5 +1,5 @@
 PGDATA=<%= @dir %>
-PGLOG=<%= File.dirname(@dir) %>/pgstartup.log
-<% if @config.key?("port") -%>
+PGLOG=<%= File.dirname(@dir) %>/pgstartup_<%= @svc_name.gsub(/[-.]/, '-' => '_', '.' => '-') %>.log
+<% if @config.key?("port") %>
 PGPORT=<%= @config['port'] %>
-<% end -%>
+<% end %>
