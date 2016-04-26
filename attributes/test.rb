@@ -18,14 +18,17 @@ default[:postgresql][:test][:pg_hba] = [
 case node['platform_family']
 when 'debian'
   default[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
+  default[:postgresql][:test][:config][:data_directory] = "/var/lib/postgresql/#{node[:postgresql][:version]}/main"
 when 'rhel'
   if node['platform_version'].to_f >= 6.0 && node['postgresql']['version'] != '8.4'
     default[:postgresql][:test][:dir] = "/var/lib/pgsql/#{node[:postgresql][:version]}/test"
   else
     default[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
   end
+  default[:postgresql][:test][:config][:data_directory] = node[:postgresql][:test][:dir]
 when 'fedora', 'suse'
   default[:postgresql][:test][:dir] = "/var/lib/pgsql/test_data"
+  default[:postgresql][:test][:config][:data_directory] = node[:postgresql][:test][:dir]
 else
   default[:postgresql][:test][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/test"
 end
